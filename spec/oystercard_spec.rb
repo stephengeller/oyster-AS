@@ -61,7 +61,7 @@ describe Oystercard do
     end
 
     it 'is not in a journey once they touch out' do
-      subject.touch_in
+      subject.touch_in(station)
       subject.touch_out
       expect(subject).to_not be_in_journey
     end
@@ -93,5 +93,34 @@ describe Oystercard do
       expect(subject.entry_station).to be_nil
     end
 
+    it 'stores station of exit' do
+      subject.touch_out(station)
+      expect(subject.exit_station).to eq station
+    end
+  end
+
+  describe '#log' do
+    before { subject.instance_variable_set(:@balance, 30) }
+    let(:station_A) { double :station_A }
+    let(:station_B) { double :station_B }
+    let(:station_C) { double :station_C }
+    let(:station_D) { double :station_D }
+    it 'will record your a completed journey' do
+      subject.touch_in(station_A)
+      subject.touch_out(station_B)
+      expect(subject.log[station_A]).to eq station_B
+    end
+
+    it 'has an empty list of journeys by default' do
+      expect(subject.log).to be_empty
+    end
+
+    it 'keeps multiple journeys' do
+      subject.touch_in(station_A)
+      subject.touch_out(station_B)
+      subject.touch_in(station_C)
+      subject.touch_out(station_D)
+      expect(subject.log).to include(station_A && station_C)
+    end
   end
 end
